@@ -1,47 +1,56 @@
-package com.example.api_videojuegos
+package com.example.lazycomponents
 
+
+import PantallaDetalleGenero
+import PantallaListaGeneros
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.api_videojuegos.ui.theme.APIVideojuegosTheme
+import com.example.lazycomponents.model.GeneroVideojuego
+import com.example.lazycomponents.ui.theme.LazyComponentsTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            APIVideojuegosTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            LazyComponentsTheme {
+                Main()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun Main() {
+    var generoSeleccionado by remember { mutableStateOf<GeneroVideojuego?>(null) }
+
+    if (generoSeleccionado == null) {
+        PantallaListaGeneros { genero ->
+            generoSeleccionado = genero
+        }
+    } else {
+        PantallaDetalleGenero(
+            generoVideojuego = generoSeleccionado!!
+        ) {
+            generoSeleccionado = null
+        }
+
+    }
 }
+
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    APIVideojuegosTheme {
-        Greeting("Android")
+    LazyComponentsTheme {
+        Main()
     }
 }
