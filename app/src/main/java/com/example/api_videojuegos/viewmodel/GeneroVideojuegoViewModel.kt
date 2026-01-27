@@ -1,82 +1,73 @@
-package com.example.lazycomponents.viewmodel
+package com.example.api_videojuegos.viewmodel
 
-import androidx.compose.ui.graphics.Color
+
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.lazycomponents.R
-import com.example.lazycomponents.model.GeneroVideojuego
+import com.example.api_videojuegos.model.DadesAPIItem
+import com.example.api_videojuegos.model.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-class GeneroVideojuegoViewModel : ViewModel() {
+class VideojuegoViewModel : ViewModel() {
 
-    //Lista de videojuegos con sus detalles
-    private val _listaGeneros = MutableLiveData<List<GeneroVideojuego>>()
-    val listaGeneros: LiveData<List<GeneroVideojuego>> = _listaGeneros
+    private val _videojuegos = MutableLiveData<List<DadesAPIItem>>()
+    val videojuegos: LiveData<List<DadesAPIItem>> get() = _videojuegos
 
-    init {
-        // Cargar los géneros de videojuegos al inicio del ViewModel
-        cargarGeneros()
+    // GET
+    fun cargarVideojuegos() {
+        RetrofitClient.api.getVideojuegos().enqueue(object : Callback<List<DadesAPIItem>> {
+            override fun onResponse(call: Call<List<DadesAPIItem>>, response: Response<List<DadesAPIItem>>) {
+                if(response.isSuccessful){
+                    _videojuegos.postValue(response.body())
+                }
+            }
+            override fun onFailure(call: Call<List<DadesAPIItem>>, t: Throwable) {
+                println("Error: ${t.message}")
+            }
+        })
     }
 
-    // Función para cargar los géneros de videojuegos
-    private fun cargarGeneros() {
-        _listaGeneros.value = listOf(
-            GeneroVideojuego(
-                "God of War",
-                "Acción",
-                R.drawable.god_of_war,
-                "Videojuego centrado en el combate y la acción constante.",
-                Color.Yellow
-            ),
-            GeneroVideojuego(
-                "Final Fantasy VII",
-                "RPG",
-                R.drawable.final_fantasy_vii,
-                "Juego de rol con historia profunda y evolución de personajes.",
-                Color.Black
-            ),
-            GeneroVideojuego(
-                "Call of Duty",
-                "Shooter",
-                R.drawable.call_of_duty,
-                "Juego de disparos en primera persona.",
-                Color.Green
-            ),
-            GeneroVideojuego(
-                "The Legend of Zelda",
-                "Aventura",
-                R.drawable.zelda,
-                "Exploración, puzzles y aventura.",
-                Color.Blue
-            ),
-            GeneroVideojuego(
-                "Super Mario Bros",
-                "Plataformas",
-                R.drawable.mario,
-                "Juego basado en saltos y niveles de plataformas.",
-                Color.Magenta
-            ),
-            GeneroVideojuego(
-                "FIFA",
-                "Deportes",
-                R.drawable.fifa,
-                "Simulación de fútbol con equipos reales.",
-                Color.Gray
-            ),
-            GeneroVideojuego(
-                "Need for Speed",
-                "Carreras",
-                R.drawable.need_for_speed,
-                "Carreras de coches a gran velocidad.",
-                Color.Red
-            ),
-            GeneroVideojuego(
-                "Resident Evil",
-                "Terror",
-                R.drawable.resident_evil,
-                "Juego de terror y supervivencia.",
-                Color.Cyan
-            )
-        )
+    // POST
+    fun agregarVideojuego(videojuego: DadesAPIItem) {
+        RetrofitClient.api.addVideojuego(videojuego).enqueue(object : Callback<DadesAPIItem> {
+            override fun onResponse(call: Call<DadesAPIItem>, response: Response<DadesAPIItem>) {
+                if(response.isSuccessful){
+                    cargarVideojuegos() // actualizar lista
+                }
+            }
+            override fun onFailure(call: Call<DadesAPIItem>, t: Throwable) {
+                println("Error: ${t.message}")
+            }
+        })
+    }
+
+    // PUT
+    fun actualizarVideojuego(id: Int, videojuego: DadesAPIItem) {
+        RetrofitClient.api.updateVideojuego(id, videojuego).enqueue(object : Callback<DadesAPIItem> {
+            override fun onResponse(call: Call<DadesAPIItem>, response: Response<DadesAPIItem>) {
+                if(response.isSuccessful){
+                    cargarVideojuegos()
+                }
+            }
+            override fun onFailure(call: Call<DadesAPIItem>, t: Throwable) {
+                println("Error: ${t.message}")
+            }
+        })
+    }
+
+    // DELETE
+    fun eliminarVideojuego(id: Int) {
+        RetrofitClient.api.deleteVideojuego(id).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if(response.isSuccessful){
+                    cargarVideojuegos()
+                }
+            }
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                println("Error: ${t.message}")
+            }
+        })
     }
 }
