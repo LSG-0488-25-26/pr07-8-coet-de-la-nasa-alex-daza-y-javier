@@ -11,6 +11,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.api_videojuegos.model.DadesAPIItem
 import java.lang.reflect.Field
 import java.util.*
@@ -75,8 +76,8 @@ fun PantallaDetalleGenero(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = imageRes),
+        AsyncImage(
+            model = generoVideojuego.imagenCaratula,
             contentDescription = nombreJuego,
             contentScale = ContentScale.Fit,
             modifier = Modifier
