@@ -1,3 +1,6 @@
+
+package com.example.api_videojuegos.view
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,13 +11,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.api_videojuegos.model.DadesAPIItem
 import com.example.lazycomponents.model.GeneroVideojuego
 
 
 //Muestra la información completa de un videojuego seleccionado
 @Composable
 fun PantallaDetalleGenero(
-    generoVideojuego: GeneroVideojuego,
+    generoVideojuego: DadesAPIItem,
     onVolver: () -> Unit
 ) {
     Column(
@@ -26,8 +30,8 @@ fun PantallaDetalleGenero(
     ) {
 
         Image(
-            painter = painterResource(generoVideojuego.imagenRes),
-            contentDescription = generoVideojuego.nombreJuego,
+            painter = painterResource(GeneroVideojuego.imagenRes),
+            contentDescription = GeneroVideojuego.nombreJuego,
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .fillMaxWidth()
