@@ -23,7 +23,7 @@ interface VideojuegoApi {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "https://tuapi.com/"
+    private const val BASE_URL = "https://api.rawg.io/api/games?key=8feeec42e5af452a8ab057a2dbf2689a\n"
 
     val api: VideojuegoApi by lazy {
         Retrofit.Builder()
