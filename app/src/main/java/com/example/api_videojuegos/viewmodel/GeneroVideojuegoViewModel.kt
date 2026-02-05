@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.api_videojuegos.model.DadesAPIItem
+import com.example.api_videojuegos.model.RawgGame
 import com.example.api_videojuegos.model.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -15,12 +16,47 @@ class VideojuegoViewModel : ViewModel() {
     private val _videojuegos = MutableLiveData<List<DadesAPIItem>>()
     val videojuegos: LiveData<List<DadesAPIItem>> get() = _videojuegos
 
-    // GET
+    // estado de carga y error
+    private val _loading = MutableLiveData<Boolean>(false)
+    val loading: LiveData<Boolean> get() = _loading
+
+    private val _error = MutableLiveData<String?>(null)
+    val error: LiveData<String?> get() = _error
+
+    // GET (RAWG)
     fun cargarVideojuegos() {
-        RetrofitClient.api.getVideojuegos().enqueue(object : Callback<List<DadesAPIItem>> {
+        _loading.postValue(true)
+        _error.postValue(null)
+        RetrofitClient.api.getVideojuegos(RetrofitClient.API_KEY).enqueue(object : Callback<com.example.api_videojuegos.model.RawgResponse> {
+            override fun onResponse(call: Call<com.example.api_videojuegos.model.RawgResponse>, response: Response<com.example.api_videojuegos.model.RawgResponse>) {
+                _loading.postValue(false)
+                if(response.isSuccessful){
+                    val rawg = response.body()
+                    val mapped: List<DadesAPIItem> = rawg?.results?.map { rg ->
+                        DadesAPIItem(
+                            id = rg.id,
+                            nombre = rg.name,
+                            imagenCaratula = rg.background_image
+                        )
+                    } ?: emptyList()
+                    _videojuegos.postValue(mapped)
+                } else {
+                    _error.postValue("Error en la respuesta: ${response.code()} ${response.message()}")
+                }
+            }
+            override fun onFailure(call: Call<com.example.api_videojuegos.model.RawgResponse>, t: Throwable) {
+                _loading.postValue(false)
+                _error.postValue(t.message ?: "Error de red")
+            }
+        })
+    }
+
+    // Mantengo los otros métodos locales si se usan
+    fun cargarVideojuegosLocal() {
+        RetrofitClient.api.getVideojuegosLocal().enqueue(object : Callback<List<DadesAPIItem>> {
             override fun onResponse(call: Call<List<DadesAPIItem>>, response: Response<List<DadesAPIItem>>) {
                 if(response.isSuccessful){
-                    _videojuegos.postValue(response.body())
+                    _videojuegos.postValue(response.body() ?: emptyList())
                 }
             }
             override fun onFailure(call: Call<List<DadesAPIItem>>, t: Throwable) {
@@ -29,12 +65,12 @@ class VideojuegoViewModel : ViewModel() {
         })
     }
 
-    // POST
+    // Los métodos POST/PUT/DELETE los mantengo sin cambios
     fun agregarVideojuego(videojuego: DadesAPIItem) {
         RetrofitClient.api.addVideojuego(videojuego).enqueue(object : Callback<DadesAPIItem> {
             override fun onResponse(call: Call<DadesAPIItem>, response: Response<DadesAPIItem>) {
                 if(response.isSuccessful){
-                    cargarVideojuegos() // actualizar lista
+                    cargarVideojuegosLocal() // actualizar lista local
                 }
             }
             override fun onFailure(call: Call<DadesAPIItem>, t: Throwable) {
@@ -43,12 +79,11 @@ class VideojuegoViewModel : ViewModel() {
         })
     }
 
-    // PUT
     fun actualizarVideojuego(id: Int, videojuego: DadesAPIItem) {
         RetrofitClient.api.updateVideojuego(id, videojuego).enqueue(object : Callback<DadesAPIItem> {
             override fun onResponse(call: Call<DadesAPIItem>, response: Response<DadesAPIItem>) {
                 if(response.isSuccessful){
-                    cargarVideojuegos()
+                    cargarVideojuegosLocal()
                 }
             }
             override fun onFailure(call: Call<DadesAPIItem>, t: Throwable) {
@@ -57,12 +92,11 @@ class VideojuegoViewModel : ViewModel() {
         })
     }
 
-    // DELETE
     fun eliminarVideojuego(id: Int) {
         RetrofitClient.api.deleteVideojuego(id).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if(response.isSuccessful){
-                    cargarVideojuegos()
+                    cargarVideojuegosLocal()
                 }
             }
             override fun onFailure(call: Call<Void>, t: Throwable) {
