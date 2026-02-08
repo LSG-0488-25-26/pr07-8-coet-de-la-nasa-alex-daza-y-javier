@@ -1,4 +1,3 @@
-// kotlin
 package com.example.api_videojuegos.view
 
 import androidx.compose.foundation.layout.*
@@ -51,7 +50,7 @@ fun PantallaDetalleJuego(
                 if (!isSmall) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         AsyncImage(
-                            model = videojuego.thumbnail,
+                            model = videojuego.imagenCaratula,
                             contentDescription = videojuego.nombre,
                             modifier = Modifier
                                 .size(if (isMedium) 220.dp else 300.dp)
@@ -65,15 +64,15 @@ fun PantallaDetalleJuego(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(text = videojuego.nombre, style = MaterialTheme.typography.headlineSmall)
-                            Text(text = "Género: ${videojuego.genero ?: "Desconocido"}")
+                            Text(text = "Género: Desconocido")
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = videojuego.descripcion ?: "Sin descripción", style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "Sin descripción", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 } else {
                     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                         AsyncImage(
-                            model = videojuego.thumbnail,
+                            model = videojuego.imagenCaratula,
                             contentDescription = videojuego.nombre,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -82,9 +81,9 @@ fun PantallaDetalleJuego(
                         )
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(text = videojuego.nombre, style = MaterialTheme.typography.headlineSmall)
-                            Text(text = "Género: ${videojuego.genero ?: "Desconocido"}")
+                            Text(text = "Género: Desconocido")
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = videojuego.descripcion ?: "Sin descripción", style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "Sin descripción", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }
@@ -97,9 +96,9 @@ fun PantallaDetalleJuego(
                     val entity = VideojuegoEntity(
                         id = videojuego.id,
                         nombre = videojuego.nombre,
-                        genero = videojuego.genero,
-                        descripcion = videojuego.descripcion,
-                        thumbnail = videojuego.thumbnail
+                        genero = null,
+                        descripcion = null,
+                        thumbnail = videojuego.imagenCaratula
                     )
                     viewModel.guardar(entity)
                     yaGuardado = true
