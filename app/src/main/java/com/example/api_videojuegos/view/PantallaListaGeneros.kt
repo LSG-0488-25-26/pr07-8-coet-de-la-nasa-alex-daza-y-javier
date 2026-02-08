@@ -23,105 +23,78 @@ fun PantallaListaGeneros(
 ) {
     val isPreview = LocalInspectionMode.current
 
-    // Estados locales de la pantalla
     var query by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
 
-    // Lista de videojuegos desde el ViewModel o falsa en Preview
-    val listaVideojuegos by viewModel.videojuegos.observeAsState(
-        if (isPreview) {
-            listOf(
-                DadesAPIItem(1, "Fortnite", ""),
-                DadesAPIItem(2, "Warframe", ""),
-                DadesAPIItem(3, "Apex Legends", "")
-            )
-        } else emptyList()
-    )
+    // 🔥 OBSERVAMOS LOS ESTADOS REALES DEL VIEWMODEL
+    val listaVideojuegos by viewModel.videojuegos.observeAsState(emptyList())
+    val loading by viewModel.loading.observeAsState(false)
+    val error by viewModel.error.observeAsState(null)
 
-    // Llamada a la API SOLO cuando se ejecuta la app real
+    // Llamar a la API al iniciar
     LaunchedEffect(Unit) {
         if (!isPreview) {
-            try {
-                loading = true
-                viewModel.cargarVideojuegos()
-            } catch (e: Exception) {
-                error = e.message
-            } finally {
-                loading = false
-            }
+            viewModel.cargarVideojuegos()
         }
     }
 
-    // Filtrado por texto de búsqueda
     val listaFiltrada = listaVideojuegos.filter {
         it.nombre.contains(query, ignoreCase = true)
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-        ) {
 
-            TextField(
-                value = query,
-                onValueChange = { query = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar juego...") },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Buscar")
+        TextField(
+            value = query,
+            onValueChange = { query = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Buscar juego...") },
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = "Buscar")
+            }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        when {
+            loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-            )
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            when {
-                loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+            error != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Error: $error",
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
+            }
 
-                error != null -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error: $error",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+            listaFiltrada.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No hay videojuegos disponibles")
                 }
+            }
 
-                listaFiltrada.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No hay videojuegos disponibles",
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(listaFiltrada) { videojuego ->
-                            ItemGeneroVideojuego(videojuego) {
-                                onGeneroClick(videojuego)
-                            }
+            else -> {
+                LazyColumn {
+                    items(listaFiltrada) { videojuego ->
+                        ItemGeneroVideojuego(videojuego) {
+                            onGeneroClick(videojuego)
                         }
                     }
                 }
