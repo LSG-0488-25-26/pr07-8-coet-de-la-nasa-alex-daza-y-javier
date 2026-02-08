@@ -19,11 +19,13 @@ import com.example.api_videojuegos.data.VideojuegoEntity
 import com.example.api_videojuegos.model.DadesAPIItem
 import com.example.api_videojuegos.viewmodel.VideojuegoDetalleViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun PantallaDetalleJuego(
     videojuego: DadesAPIItem,
-    viewModel: VideojuegoDetalleViewModel = viewModel()
+    viewModel: VideojuegoDetalleViewModel = viewModel<VideojuegoDetalleViewModel>()
 ) {
     val scope = rememberCoroutineScope()
     var yaGuardado by remember { mutableStateOf(false) }
@@ -32,80 +34,78 @@ fun PantallaDetalleJuego(
         yaGuardado = viewModel.comprobarGuardado(videojuego.id)
     }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val maxW = maxWidth
-        val isSmall = maxW < 600.dp
-        val isMedium = maxW in 600.dp..840.dp
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                if (!isSmall) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        AsyncImage(
-                            model = videojuego.imagenCaratula,
-                            contentDescription = videojuego.nombre,
-                            modifier = Modifier
-                                .size(if (isMedium) 220.dp else 300.dp)
-                                .padding(8.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                        Column(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(text = videojuego.nombre, style = MaterialTheme.typography.headlineSmall)
-                            Text(text = "Género: Desconocido")
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "Sin descripción", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-                } else {
-                    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                        AsyncImage(
-                            model = videojuego.imagenCaratula,
-                            contentDescription = videojuego.nombre,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            Text(text = videojuego.nombre, style = MaterialTheme.typography.headlineSmall)
-                            Text(text = "Género: Desconocido")
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "Sin descripción", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-                }
-            }
+            Column(modifier = Modifier.fillMaxWidth()) {
+                AsyncImage(
+                    model = videojuego.imagenCaratula,
+                    contentDescription = videojuego.nombre,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp),
+                    contentScale = ContentScale.Crop
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Button(onClick = {
-                scope.launch {
-                    val entity = VideojuegoEntity(
-                        id = videojuego.id,
-                        nombre = videojuego.nombre,
-                        genero = null,
-                        descripcion = null,
-                        thumbnail = videojuego.imagenCaratula
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(text = videojuego.nombre, style = MaterialTheme.typography.headlineSmall)
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    videojuego.genero?.let {
+                        Text(text = "Género: $it", style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    videojuego.plataforma?.let {
+                        Text(text = "Plataforma: $it", style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    videojuego.publisher?.let {
+                        Text(text = "Publisher: $it", style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    videojuego.releaseDate?.let {
+                        Text(text = "Lanzamiento: $it", style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = videojuego.descripcion ?: "Sin descripción disponible.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 6,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    viewModel.guardar(entity)
-                    yaGuardado = true
                 }
-            }, enabled = !yaGuardado) {
-                Text(if (yaGuardado) "Guardado" else "Guardar en favoritos")
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = {
+            scope.launch {
+                val entity = VideojuegoEntity(
+                    id = videojuego.id,
+                    nombre = videojuego.nombre,
+                    genero = videojuego.genero,
+                    descripcion = videojuego.descripcion,
+                    thumbnail = videojuego.imagenCaratula
+                )
+                viewModel.guardar(entity)
+                yaGuardado = true
+            }
+        }, enabled = !yaGuardado) {
+            Text(if (yaGuardado) "Guardado" else "Guardar en favoritos")
         }
     }
 }
