@@ -1,3 +1,4 @@
+
 package com.example.api_videojuegos.model
 
 import com.google.gson.annotations.SerializedName
