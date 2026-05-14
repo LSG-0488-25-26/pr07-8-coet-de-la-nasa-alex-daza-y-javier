@@ -18,19 +18,17 @@ import androidx.compose.material.icons.filled.Search
 
 @Composable
 fun PantallaListaGeneros(
-    viewModel: VideojuegoViewModel = viewModel(),
+    viewModel: VideojuegoViewModel = viewModel<VideojuegoViewModel>(),
     onGeneroClick: (DadesAPIItem) -> Unit
 ) {
     val isPreview = LocalInspectionMode.current
 
     var query by remember { mutableStateOf("") }
 
-    // 🔥 OBSERVAMOS LOS ESTADOS REALES DEL VIEWMODEL
     val listaVideojuegos by viewModel.videojuegos.observeAsState(emptyList())
     val loading by viewModel.loading.observeAsState(false)
     val error by viewModel.error.observeAsState(null)
 
-    // Llamar a la API al iniciar
     LaunchedEffect(Unit) {
         if (!isPreview) {
             viewModel.cargarVideojuegos()
@@ -74,10 +72,16 @@ fun PantallaListaGeneros(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Error: $error",
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Error: $error",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(onClick = { viewModel.cargarVideojuegos() }) {
+                            Text("Reintentar")
+                        }
+                    }
                 }
             }
 
@@ -86,7 +90,13 @@ fun PantallaListaGeneros(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No hay videojuegos disponibles")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("No hay videojuegos disponibles")
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(onClick = { viewModel.cargarVideojuegos() }) {
+                            Text("Reintentar carga")
+                        }
+                    }
                 }
             }
 
