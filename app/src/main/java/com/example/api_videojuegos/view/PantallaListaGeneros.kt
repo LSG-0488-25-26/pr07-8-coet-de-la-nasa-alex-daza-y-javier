@@ -57,6 +57,26 @@ fun PantallaListaGeneros(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        if (listaFiltrada.isNotEmpty()) {
+            if (loading) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Actualizando...")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            LazyColumn {
+                items(listaFiltrada) { videojuego ->
+                    ItemGeneroVideojuego(videojuego) {
+                        onGeneroClick(videojuego)
+                    }
+                }
+            }
+            return@Column
+        }
+
         when {
             loading -> {
                 Box(

@@ -7,12 +7,10 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.Flow
 
 class VideojuegoRepository(private val dao: VideojuegoDao) {
-    // Guardamos en IO para garantizar no bloquear el hilo UI
     suspend fun save(videojuego: VideojuegoEntity): Long = withContext(Dispatchers.IO) {
         dao.insert(videojuego)
     }
 
-    // Inserción en lote
     suspend fun saveAll(videojuegos: List<VideojuegoEntity>): List<Long> = withContext(Dispatchers.IO) {
         dao.insertAll(videojuegos)
     }
